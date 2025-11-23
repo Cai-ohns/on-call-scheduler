@@ -12,14 +12,21 @@ try {
   client = createClient(supabaseUrl, supabaseAnonKey)
 } catch (error) {
   console.error('Supabase initialization failed:', error)
+  console.log('VITE_SUPABASE_URL:', supabaseUrl) // Debug log
+
   // Fallback mock client to prevent app crash
+  const mockBuilder = {
+    select: () => mockBuilder,
+    insert: () => mockBuilder,
+    update: () => mockBuilder,
+    delete: () => mockBuilder,
+    eq: () => mockBuilder,
+    order: () => Promise.resolve({ data: [], error: { message: 'Supabase not connected. Check environment variables.' } }),
+    then: (resolve) => Promise.resolve({ data: [], error: { message: 'Supabase not connected.' } }).then(resolve)
+  }
+
   client = {
-    from: () => ({
-      select: () => Promise.resolve({ data: [], error: null }),
-      insert: () => Promise.resolve({ data: [], error: null }),
-      update: () => Promise.resolve({ data: [], error: null }),
-      delete: () => Promise.resolve({ data: [], error: null }),
-    })
+    from: () => mockBuilder
   }
 }
 
