@@ -91,7 +91,8 @@ function SchedulePage() {
         random_seed: Math.floor(Math.random() * (2**31 - 1))
       }
       
-      const response = await axios.post('http://localhost:8000/api/schedule/generate', requestWithSeed)
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await axios.post(`${API_URL}/api/schedule/generate`, requestWithSeed)
       setScheduleData(response.data)
       // Update lastRequestData to include the seed for consistency
       setLastRequestData(requestWithSeed)
