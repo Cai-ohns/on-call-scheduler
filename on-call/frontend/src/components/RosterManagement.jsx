@@ -32,7 +32,16 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
         .order('name')
       
       if (error) throw error
-      setStaff(data)
+      
+      // Sort by Role (Senior > Intermediate > Junior) then Name
+      const roleOrder = { 'Senior': 1, 'Intermediate': 2, 'Junior': 3 }
+      const sortedData = data.sort((a, b) => {
+        const roleDiff = (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99)
+        if (roleDiff !== 0) return roleDiff
+        return a.name.localeCompare(b.name)
+      })
+
+      setStaff(sortedData)
       setError(null)
     } catch (err) {
       console.error('Error fetching staff:', err)
