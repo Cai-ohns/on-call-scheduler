@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/on-call/frontend/$1"
+    }
+  ],
+  "buildCommand": "cd on-call/frontend && npm install && npm run build",
+  "outputDirectory": "on-call/frontend/dist",
+  "framework": "vite"
+}
+
