@@ -157,61 +157,84 @@ const ScheduleCalendar = ({ scheduleData, onRegenerate, isRegenerating }) => {
         const fridayBalanced = (maxFriday - minFriday) <= 1
         const weekendBalanced = (maxWeekend - minWeekend) <= 1
 
+        const roleOrder = { 'Senior': 1, 'Intermediate': 2, 'Junior': 3 }
+        
+        const sortedStaff = staffArray.sort((a, b) => {
+          const roleDiff = (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99)
+          if (roleDiff !== 0) return roleDiff
+          return a.name.localeCompare(b.name)
+        })
+
         return (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-medium text-gray-800 mb-3">Staff Summary</h3>
-            
-            {/* Balance Indicators */}
-            <div className="mb-4 flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700">Weekend Shifts:</span>
-                <span className={`px-2 py-1 rounded ${weekendBalanced ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                  {minWeekend === maxWeekend ? `${minWeekend} each` : `${minWeekend}-${maxWeekend} (${weekendBalanced ? 'Balanced' : 'Unbalanced'})`}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-700">Friday Shifts:</span>
-                <span className={`px-2 py-1 rounded ${fridayBalanced ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                  {minFriday === maxFriday ? `${minFriday} each` : `${minFriday}-${maxFriday} (${fridayBalanced ? 'Balanced' : 'Unbalanced'})`}
-                </span>
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-medium text-gray-800">Staff Summary</h3>
+              <div className="flex gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600">Weekend Balance:</span>
+                  <span className={`px-2 py-0.5 rounded font-medium ${weekendBalanced ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {minWeekend === maxWeekend ? 'Perfect' : `${minWeekend}-${maxWeekend}`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600">Friday Balance:</span>
+                  <span className={`px-2 py-0.5 rounded font-medium ${fridayBalanced ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {minFriday === maxFriday ? 'Perfect' : `${minFriday}-${maxFriday}`}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {Object.entries(staff_assignments).map(([name, info]) => {
-                const color = getRoleColor(info.role)
-                const diff = info.actual - info.target
-                const fridayShifts = info.friday_shifts ?? 0
-                const weekendShifts = info.weekend_shifts ?? 0
-                
-                return (
-                  <div key={name} className={`p-3 rounded-lg border ${color.replace('bg-', 'border-').replace('text-white', '')} ${color}`}>
-                    <div className="font-semibold mb-2">{name}</div>
-                    <div className="text-sm opacity-90 space-y-1">
-                      <div>
-                        <span>Target: {info.target}</span>
-                        <span className="mx-2">|</span>
-                        <span>Actual: {info.actual}</span>
-                        {diff !== 0 && (
-                          <span className={`ml-2 font-medium ${diff > 0 ? 'text-green-200' : 'text-red-200'}`}>
-                            ({diff > 0 ? '+' : ''}{diff})
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Calls</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weekend Calls</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Friday Calls</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {sortedStaff.map((staff) => {
+                    const diff = staff.actual - staff.target
+                    const diffColor = diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-400'
+                    const diffText = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '✓'
+                    
+                    // Role badge styles
+                    let roleBadgeClass = "bg-gray-100 text-gray-800"
+                    if (staff.role === 'Senior') roleBadgeClass = "bg-indigo-100 text-indigo-800"
+                    if (staff.role === 'Intermediate') roleBadgeClass = "bg-teal-100 text-teal-800"
+                    if (staff.role === 'Junior') roleBadgeClass = "bg-amber-100 text-amber-800"
+
+                    return (
+                      <tr key={staff.name} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {staff.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${roleBadgeClass}`}>
+                            {staff.role}
                           </span>
-                        )}
-                      </div>
-                      <div className="pt-1 border-t border-white/20">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs opacity-75">Weekends:</span>
-                          <span className="font-semibold">{weekendShifts}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs opacity-75">Fridays:</span>
-                          <span className="font-semibold">{fridayShifts}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <span className="font-medium text-gray-900">{staff.actual}</span>
+                          <span className="text-xs text-gray-400 mx-1">/</span>
+                          <span className="text-xs text-gray-400">{staff.target} target</span>
+                          {diff !== 0 && <span className={`ml-2 text-xs font-medium ${diffColor}`}>({diffText})</span>}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {staff.weekend_shifts || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {staff.friday_shifts || 0}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         )
