@@ -16,9 +16,16 @@ const RosterManagement = () => {
     fetchStaff()
   }, [])
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  // Note: We are now using Supabase directly for roster management, 
+  // so we don't strictly need the backend API for CRUD operations anymore.
+  // Keeping the Supabase integration we added earlier.
+
   const fetchStaff = async () => {
     try {
       setLoading(true)
+      // Direct Supabase call - no backend API needed here
       const { data, error } = await supabase
         .from('staff')
         .select('*')

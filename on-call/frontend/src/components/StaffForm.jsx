@@ -136,8 +136,10 @@ const StaffForm = ({ onScheduleGenerated, onError, loading, setLoading }) => {
       num_days: numDays
     }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
     try {
-      const response = await axios.post('http://localhost:8000/api/schedule/generate', requestData)
+      const response = await axios.post(`${API_URL}/api/schedule/generate`, requestData)
       onScheduleGenerated(response.data, requestData)
     } catch (err) {
       const errorMessage = err.response?.data?.detail || err.message || 'Failed to generate schedule'
