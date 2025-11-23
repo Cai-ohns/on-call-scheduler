@@ -25,11 +25,20 @@ const StaffForm = ({ onScheduleGenerated, onError, loading, setLoading }) => {
         .order('name')
       
       if (error) throw error
-      setRosterStaff(data)
+      
+      // Sort by Role (Senior > Intermediate > Junior) then Name
+      const roleOrder = { 'Senior': 1, 'Intermediate': 2, 'Junior': 3 }
+      const sortedData = data.sort((a, b) => {
+        const roleDiff = (roleOrder[a.role] || 99) - (roleOrder[b.role] || 99)
+        if (roleDiff !== 0) return roleDiff
+        return a.name.localeCompare(b.name)
+      })
+
+      setRosterStaff(sortedData)
       
       // Initialize selected staff with default values
       const initialSelected = {}
-      data.forEach(staff => {
+      sortedData.forEach(staff => {
         initialSelected[staff.id] = {
           unavailableDays: [],
           targetShifts: staff.default_target_shifts
