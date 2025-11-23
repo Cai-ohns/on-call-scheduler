@@ -26,6 +26,7 @@ try {
   }
 
   client = {
+    isMock: true, // Flag to detect mock usage
     from: () => mockBuilder
   }
 }
